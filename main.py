@@ -69,14 +69,15 @@ def main():
             for x in range(len(SelectiveLocations[i])):
                 route = getRoute(rentProperty, SelectiveLocations[i][x])
                 dictLocNameAndRoute[SelectiveLocationNames[i][x]] = route
-                print SelectiveLocationNames[i][x],"\t", route, "Accept rate:", str(route.getAcceptableProbability() * 10) + "%"
+            dictLocNameAndRoute = sorted(dictLocNameAndRoute.items(), key=operator.itemgetter(1))
             closestSupermarket = ""
             closestRoute = dictLocNameAndRoute[SelectiveLocationNames[i][0]]
             for key in dictLocNameAndRoute:
+                print key,"\t\t", dictLocNameAndRoute[key], "Accept:", str(dictLocNameAndRoute[key].getAcceptableProbability() * 100) + "%"
                 if dictLocNameAndRoute[key] > closestRoute:
                     closestRoute = dictLocNameAndRoute[key]
                     closestSupermarket = key
-            print SelectionNames[i] + ": ", closestSupermarket, closestRoute, "Accept rate:", str(closestRoute.getAcceptableProbability() * 10) + "%"
+            print SelectionNames[i] + ": ", closestSupermarket, closestRoute, "Accept:", str(closestRoute.getAcceptableProbability() * 100) + "%"
 
 if __name__ == '__main__':
     main()

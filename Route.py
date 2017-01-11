@@ -3,7 +3,7 @@
 import numpy as np
 
 class Route:
-    def __init__(self, dist, wTime, bTime, MLPredictAcceptableRate=False):
+    def __init__(self, dist, wTime, bTime, MLPredictAcceptableRate=True):
         self.mDistance = dist
         self.mWalkTime = wTime
         self.mBusTime = bTime
@@ -13,7 +13,7 @@ class Route:
             self.mModel.load_weights("RouteModelWeights.h5")
 
     # This function requires MLPredictAcceptableRate to be true.
-    def getAcceptablePossibility(self):
+    def getAcceptableProbability(self):
         return self.mModel.predict(np.array([[self.mDistance, self.mWalkTime, self.mBusTime]]))[0][0]
 
     # This function requires MLPredictAcceptableRate to be true.
@@ -26,4 +26,7 @@ class Route:
     # This function requires MLPredictAcceptableRate to be true.
     def __gt__(self, other):
         return self.getAcceptablePossibility() > other.getAcceptablePossibility()
+
+    def __str__(self):
+        return "Distance: " + str(self.mDistance) + " km, Walk duration: " + str(self.mWalkTime) + " min, Bus Duration: " + str(self.mBusTime) + " min"
 

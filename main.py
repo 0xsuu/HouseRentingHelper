@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Put your properties' addresses here.
-PropertyLocations = ["YO10 5DD"]
+PropertyLocations = ["11 Walmgate, York, YO1 9TX"]
 
 # Turn off this to omit the requirement of Keras.
 AcceptablePrediction = True
@@ -10,8 +10,9 @@ AcceptablePrediction = True
 Locations = ["YO10 5DD", "YO10 5GP", "YO1 7LZ", "York Railstation"]
 LocationNames = ["West Campus", "East Campus", "York City Centre", "York Railstation"]
 
-SelectiveLocations = [[]]
+SelectiveLocations = []
 SelectiveLocationNames = []
+SelectionNames = []
 
 API_KEY = "AIzaSyC7lgoGeM6FChC_3wGFA0Uv2V2DGAu9Ed0"
 
@@ -27,7 +28,7 @@ def requestRouteJson(origin, destination, mode):
     urlMask = "https://maps.googleapis.com/maps/api/directions/json?origin=\"%s\"&destination=\"%s\"&mode=%s&key=%s"
     return json.loads(requests.get(url = urlMask % (origin, destination, mode, API_KEY)).text)
 def requestPlacesJson(location):
-    urlMask = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s&radius=10000&keyword=supermarket&key=%s"
+    urlMask = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s&radius=5000&keyword=supermarket&key=%s"
     return json.loads(requests.get(url = urlMask % (location, API_KEY)).text)
 
 def getDistance(jsonResult):
@@ -44,12 +45,38 @@ def getRoute(origin, destination):
     walkTime = getTime(jResult)
     jResult = requestRouteJson(origin, destination, "transit")
     busTime = getTime(jResult)
+    global propertyLocation
+    propertyLocation = getLatLngString(jResult)
     return Route(distance, walkTime, busTime, AcceptablePrediction)
 
 def main():
-    for property in PropertyLocations:
+    for rentProperty in PropertyLocations:
         for place in Locations:
-            print getRoute(property, place)
+            print getRoute(rentProperty, place)
+        assert propertyLocation != ""
+        results = requestPlacesJson(propertyLocation)["results"]
+        print "Found " + str(len(results)) + " supermarkets around."
+        global SelectiveLocations, SelectiveLocationNames, SelectionNames
+        SelectiveLocations += [[]]
+        SelectiveLocationNames += [[]]
+        for supermarket in results:
+            print supermarket["name"], ", Address:", supermarket["vicinity"]
+            SelectiveLocations[-1] += [supermarket["vicinity"]]
+            SelectiveLocationNames[-1] += [supermarket["name"]]
+            SelectionNames += ["Most Acceptable Supermarket"]
+        for i in range(len(SelectiveLocations)):
+            dictLocNameAndRoute = {}
+            for x in range(len(SelectiveLocations[i])):
+                route = getRoute(rentProperty, SelectiveLocations[i][x])
+                dictLocNameAndRoute[SelectiveLocationNames[i][x]] = route
+                print SelectiveLocationNames[i][x],"\t", route, "Accept rate:", str(route.getAcceptableProbability()) + "%"
+            closestSupermarket = ""
+            closestRoute = dictLocNameAndRoute[SelectiveLocationNames[i][0]]
+            for key in dictLocNameAndRoute:
+                if dictLocNameAndRoute[key] < closestRoute:
+                    closestRoute = dictLocNameAndRoute[key]
+                    closestSupermarket = key
+            print SelectionNames[i] + ": ", closestSupermarket, closestRoute, "Accept rate:", str(closestRoute.getAcceptableProbability()) + "%"
 
 if __name__ == '__main__':
     main()

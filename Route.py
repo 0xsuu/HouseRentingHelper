@@ -22,10 +22,10 @@ class Route:
 
     # This function requires MLPredictAcceptableRate to be true.
     def __lt__(self, other):
-        return self.getAcceptablePossibility() < other.getAcceptablePossibility()
+        return self.getAcceptableProbability() < other.getAcceptableProbability()
     # This function requires MLPredictAcceptableRate to be true.
     def __gt__(self, other):
-        return self.getAcceptablePossibility() > other.getAcceptablePossibility()
+        return self.getAcceptableProbability() > other.getAcceptableProbability()
 
     def __str__(self):
         return "Distance: " + str(self.mDistance) + " km, Walk duration: " + str(self.mWalkTime) + " min, Bus Duration: " + str(self.mBusTime) + " min"

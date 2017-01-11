@@ -48,3 +48,6 @@ def train():
     print model.predict(X_cv)
     print model.evaluate(X_cv, Y_cv)
 
+    model.save('RouteModel.h5')
+    model.save_weights('RouteModelWeights.h5')
+

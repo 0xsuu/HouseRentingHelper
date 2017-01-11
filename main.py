@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Put your properties' addresses here.
-PropertyLocations = ["11 Walmgate, York, YO1 9TX"]
+PropertyLocations = ["Queens House, 9 Micklegate, York, YO1 6JH"]
 
 # Turn off this to omit the requirement of Keras.
 AcceptablePrediction = True
@@ -18,6 +18,7 @@ API_KEY = "AIzaSyC7lgoGeM6FChC_3wGFA0Uv2V2DGAu9Ed0"
 
 import json, requests
 from Route import *
+import operator
 
 def requestRouteJson(origin, destination, mode):
     # Feed following parameters in with sequence.
@@ -51,8 +52,13 @@ def getRoute(origin, destination):
 
 def main():
     for rentProperty in PropertyLocations:
-        for place in Locations:
-            print getRoute(rentProperty, place)
+        resultForPaste = ""
+        for placeIndex in range(len(Locations)):
+            r = getRoute(rentProperty, Locations[placeIndex])
+            resultForPaste += str(r.mDistance) + "\t" + str(r.mWalkTime) + "\t" + str(r.mBusTime) + "\t"
+            print LocationNames[placeIndex], "\t", r
+        print resultForPaste
+
         assert propertyLocation != ""
         results = requestPlacesJson(propertyLocation)["results"]
         print "Found " + str(len(results)) + " supermarkets around."
@@ -69,11 +75,11 @@ def main():
             for x in range(len(SelectiveLocations[i])):
                 route = getRoute(rentProperty, SelectiveLocations[i][x])
                 dictLocNameAndRoute[SelectiveLocationNames[i][x]] = route
-            dictLocNameAndRoute = sorted(dictLocNameAndRoute.items(), key=operator.itemgetter(1))
+            dictLocNameAndRoute = dict(sorted(dictLocNameAndRoute.items(), key=operator.itemgetter(1)))
             closestSupermarket = ""
             closestRoute = dictLocNameAndRoute[SelectiveLocationNames[i][0]]
             for key in dictLocNameAndRoute:
-                print key,"\t\t", dictLocNameAndRoute[key], "Accept:", str(dictLocNameAndRoute[key].getAcceptableProbability() * 100) + "%"
+                print key,"\t\t\t\t", dictLocNameAndRoute[key], "Accept:", str(dictLocNameAndRoute[key].getAcceptableProbability() * 100) + "%"
                 if dictLocNameAndRoute[key] > closestRoute:
                     closestRoute = dictLocNameAndRoute[key]
                     closestSupermarket = key
